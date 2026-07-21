@@ -1,19 +1,26 @@
-import api from "../../services/api";
+// services/UsuarioService.js
 
-const UsuarioService = () => {
-    const listarUsuarios = async () => {
-        try {
-            const response = await api.get('/usuarios');
-            const data = response.data;
-            console.log('Fetched users:', data);
-            return data;
-        } catch (error) {
-            console.error('Error fetching users:', error);
-            throw error;
-        }
-    };
+import api from '../../services/api';
 
-    return { listarUsuarios };
+const usuarioService = {
+    listarUsuarios: async () => {
+        const { data } = await api.get('/usuarios');
+        return data;
+    },
+
+    criarUsuario: async (usuario) => {
+        const { data } = await api.post('/usuarios', usuario);
+        return data;
+    },
+
+    excluirUsuario: async (id) => {
+        await api.delete(`/usuarios/${id}`);
+    },
+
+    atualizarUsuario: async (id, usuario) => {
+        const { data } = await api.put(`/usuarios/${id}`, usuario);
+        return data;
+    }
 };
 
-export default UsuarioService;
+export default usuarioService;

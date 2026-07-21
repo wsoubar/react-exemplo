@@ -1,31 +1,34 @@
-import React, { useState, useEffect } from 'react'
-import UsuarioService from './UsuarioService'
+import { useState, useEffect } from 'react'
+import usuarioService from './UsuarioService'
+import './UsuarioList.css'
 
-const UsuarioList = () => {
+const UsuarioList = ({ usuarios }) => {
   const [listaUsuarios, setListaUsuarios] = useState([])
 
-  const usuarioService = UsuarioService()
-
   useEffect(() => {
-    const fetchUsuarios = async () => {
-      try {
-        const usuarios = await usuarioService.listarUsuarios()
-        setListaUsuarios(usuarios)
-      } catch (error) {
-        console.error('Error fetching users:', error)
-      }
-    }
-
-    fetchUsuarios()
-  }, [])
+    setListaUsuarios(usuarios)
+  }, [usuarios])
 
   return (
-    <div>
+    <div className="usuarios-container">
       <h2>Lista de Usuários</h2>
-      <ul>
-        {listaUsuarios.map((usuario) => (
-          <li key={usuario.id}>{usuario.nome}</li>
-        ))}
+      <ul className="usuarios-lista">
+        {listaUsuarios
+          .slice()
+          .sort((a, b) => a.nome.localeCompare(b.nome))
+          .map((usuario) => (
+            <li key={usuario.id} className="usuario-item">{usuario.nome} - {usuario.username}
+              <div className="usuario-acoes">
+                <button className="btn-editar">
+                  Editar
+                </button>
+
+                <button className="btn-excluir">
+                  Excluir
+                </button>
+              </div>
+            </li>
+          ))}
       </ul>
     </div>
   )
