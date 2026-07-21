@@ -1,59 +1,67 @@
-import { useState } from 'react';
-import usuarioService from './UsuarioService';
-import './UsuarioForm.css';
+import { useEffect, useState, useRef } from "react";
+import usuarioService from "./UsuarioService";
+import "./UsuarioForm.css";
 
-const UsuarioForm = ({ onSalvar }) => {
-
-
-  const [usuario, setUsuario] = useState({
-    nome: '',
-    username: '',
-    password: '',
-    email: ''
+const UsuarioForm = ({ onSalvar, usuario }) => {
+  const [formData, setFormData] = useState({
+    nome: "",
+    username: "",
+    password: "",
+    email: "",
   });
 
-  // // chama a inclusão de usuario no backend
-  // const criarUsuario = async (usuario) => {
-  //   try {
-  //     const novoUsuario = await usuarioService.criarUsuario(usuario);
-  //     return novoUsuario;
-  //   } catch (error) {
-  //     console.error('Error creating user:', error);
-  //     throw error;
-  //   }
+  const dialogRef = useRef();
 
-  //   usuarioService.listarUsuarios();
-
-  // };
+  useEffect(() => {
+    if (usuario) {
+      setFormData({
+        nome: usuario.nome || "",
+        username: usuario.username || "",
+        password: usuario.password || "",
+        email: usuario.email || "",
+      });
+    } else {
+      setFormData({
+        nome: "",
+        username: "",
+        password: "",
+        email: "",
+      });
+    }
+  }, [usuario]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setUsuario((prev) => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const novoUsuario = await usuarioService.criarUsuario(usuario);
+
+    const novoUsuario = usuario
+      ? await usuarioService.atualizarUsuario(usuario.id, formData)
+      : await usuarioService.criarUsuario(formData);
 
     if (onSalvar) {
       onSalvar(novoUsuario);
+      dialogRef.current.showModal();
     }
 
-    setUsuario({
-      nome: '',
-      username: '',
-      password: '',
-      email: ''
+    setFormData({
+      nome: "",
+      username: "",
+      password: "",
+      email: "",
     });
   };
 
   return (
     <div className="usuario-form-container">
-      <h2>Cadastro de Usuário</h2>
+      <h2>{usuario ? "Editar Usuário" : "Cadastro de Usuário"}</h2>
 
       <form onSubmit={handleSubmit} className="usuario-form">
         <div className="form-group">
@@ -62,7 +70,7 @@ const UsuarioForm = ({ onSalvar }) => {
             id="nome"
             name="nome"
             type="text"
-            value={usuario.nome}
+            value={formData.nome}
             onChange={handleChange}
             required
           />
@@ -74,7 +82,7 @@ const UsuarioForm = ({ onSalvar }) => {
             id="username"
             name="username"
             type="text"
-            value={usuario.username}
+            value={formData.username}
             onChange={handleChange}
             required
           />
@@ -86,7 +94,7 @@ const UsuarioForm = ({ onSalvar }) => {
             id="email"
             name="email"
             type="email"
-            value={usuario.email}
+            value={formData.email}
             onChange={handleChange}
             required
           />
@@ -98,7 +106,7 @@ const UsuarioForm = ({ onSalvar }) => {
             id="password"
             name="password"
             type="password"
-            value={usuario.password}
+            value={formData.password}
             onChange={handleChange}
             required
           />
@@ -108,6 +116,17 @@ const UsuarioForm = ({ onSalvar }) => {
           Salvar
         </button>
       </form>
+      <dialog ref={dialogRef}>
+        <h3>Informação</h3>
+        <p>Usuário cadastrado com sucesso!</p>
+
+        <button
+          className="btn-cancelar-modal"
+          onClick={() => dialogRef.current.close()}
+        >
+          Sair
+        </button>
+      </dialog>
     </div>
   );
 };
